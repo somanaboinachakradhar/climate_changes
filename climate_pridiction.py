@@ -68,9 +68,9 @@ app = dash.Dash(__name__)
 
 # Layout of the dashboard
 app.layout = html.Div([
-    html.H1("Climate Change Predictions and Precautions", style={'textAlign': 'center'}),
+    html.H1("Climate Change Predictions and Precautions", style={'textAlign': 'center', 'marginBottom': '30px'}),
     
-    # Graph for predicted temperature changes
+    # Enhanced Graph for predicted temperature changes
     dcc.Graph(
         id='temp-predictions',
         figure={
@@ -80,21 +80,39 @@ app.layout = html.Div([
                     y=y_future_pred,
                     mode='lines+markers',
                     name='Predicted Temperature (°C)',
-                    line={'color': 'red'}
+                    line={'color': 'red', 'width': 3},
+                    marker={'size': 8}
                 ),
             ],
             'layout': go.Layout(
                 title='Predicted Average Temperature (°C) for 2026-2030',
                 xaxis={'title': 'Year'},
                 yaxis={'title': 'Avg Temperature (°C)'},
+                hovermode='x unified',
+                template='plotly_dark'
             ),
         }
+    ),
+    
+    # Pie Chart for Renewable Energy vs Fossil Fuel Usage
+    dcc.Graph(
+        figure=go.Figure(
+            data=[go.Pie(
+                labels=['Renewable Energy (%)', 'Fossil Fuel (%)'],
+                values=[years_future['Renewable Energy (%)'].mean(), 100 - years_future['Renewable Energy (%)'].mean()],
+                hole=0.4,
+                marker=dict(colors=['green', 'gray'])
+            )],
+            layout=go.Layout(
+                title='Average Energy Source Distribution (2026-2030)'
+            )
+        )
     ),
     
     # Precautions section for future years
     html.Div([
         html.H3("Precautionary Actions Based on Predictions", style={'textAlign': 'center'}),
-        html.Div(id='precautions-output', style={'fontSize': 18}),
+        html.Div(id='precautions-output', style={'fontSize': 18, 'padding': '20px'}),
     ]),
 ])
 
@@ -104,13 +122,17 @@ app.layout = html.Div([
     [dash.dependencies.Input('temp-predictions', 'relayoutData')]
 )
 def update_precautions(input_data):
-    precautions_text = ""
-    for i, year in enumerate(years_future['Year']):
-        precautions = climate_precautions(y_future_pred[i])
-        precautions_text += f"Year: {year}<br>Predicted Temperature: {y_future_pred[i]:.2f}°C<br>"
-        precautions_text += "<br>".join([f"- {precaution}" for precaution in precautions])
-        precautions_text += "<br><br>"
-    return precautions_text
+    return html.Div([
+        html.Div([
+            html.H4(f"Year: {year}", style={'color': 'blue'}),
+            html.P(f"Predicted Temperature: {y_future_pred[i]:.2f}°C", style={'fontWeight': 'bold'}),
+            html.Ul([html.Li(precaution) for precaution in climate_precautions(y_future_pred[i])]),
+        ], style={
+            'border': '1px solid #ddd', 'borderRadius': '10px', 'padding': '15px', 'marginBottom': '10px',
+            'boxShadow': '2px 2px 10px #aaa', 'backgroundColor': '#f9f9f9'
+        })
+        for i, year in enumerate(years_future['Year'])
+    ])
 
 # Run the app
 if __name__ == '__main__':
