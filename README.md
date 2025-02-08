@@ -25,7 +25,7 @@ This project is a climate prediction dashboard built using Dash and Plotly. It p
     ```
 2. Navigate to the project directory:
     ```bash
-    cd /D:/Wad/Week1/aws/collage/Hackathon
+    cd /climate_changes
     ```
 3. Install the required packages:
     ```bash
